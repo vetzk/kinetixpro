@@ -2,15 +2,19 @@
   "name": "InternKinetix",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "build": "tsc && tsc-alias",
+    "serve": "cross-env NODE_ENV=production node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prisma": "npx prisma",
+    "postinstall": "prisma generate",
+    "start": "nodemon src/index.ts"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "turbo": "^2.3.1",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "husky": "^8.0.0"
   },
   "engines": {
     "node": ">=18"
@@ -19,5 +23,14 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "tsc-alias": "^1.8.10",
+    "tsconfig": "^7.0.0"
+  }
 }

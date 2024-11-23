@@ -1,102 +1,236 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+"use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import apiCall from "@/helper/apiCall";
+import Image from "next/image";
+import { useContext, useState } from "react";
+import { FormContext } from "./contexts/FormContext";
+import { useRouter } from "next/navigation";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
+type User = {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  gender: string;
+  hobby: string;
 };
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [form, setForm] = useState<User>({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    gender: "",
+    hobby: "",
+  });
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turbo.build/repo/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const router = useRouter();
+
+  const { setFormReview } = useContext(FormContext);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!form.name) {
+      newErrors.name = "Name is required.";
+    } else if (!/^[a-zA-Z\s]+$/.test(form.name)) {
+      newErrors.name = "Name must contain only alphabets.";
+    }
+
+    if (!form.email) {
+      newErrors.email = "Email is required.";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) // Regex for email validation
+    ) {
+      newErrors.email = "Invalid email format.";
+    }
+
+    if (!form.phoneNumber) {
+      newErrors.phoneNumber = "Phone number is required.";
+    } else if (!/^\d+$/.test(form.phoneNumber)) {
+      newErrors.phoneNumber = "Phone number must contain only numbers.";
+    }
+
+    if (!form.address) {
+      newErrors.address = "Address is required.";
+    }
+
+    if (!form.gender) {
+      newErrors.gender = "Gender is required.";
+    }
+
+    if (!form.hobby) {
+      newErrors.hobby = "Hobby is required.";
+    } else if (!/^[a-zA-Z\s]+$/.test(form.hobby)) {
+      newErrors.hobby = "Hobby must contain only alphabets.";
+    }
+
+    setErrors(newErrors);
+
+    // Return true if there are no errors
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmitForm = async () => {
+    if (!validateForm()) return;
+
+    try {
+      //   const { data } = await apiCall.post("/submitdata", {
+      //     name: form.name,
+      //     email: form.email,
+      //     address: form.address,
+      //     gender: form.gender,
+      //     hobby: form.hobby,
+      //     phoneNumber: form.phoneNumber,
+      //   });
+
+      //   setForm({
+      //     name: "",
+      //     address: "",
+      //     email: "",
+      //     phoneNumber: "",
+      //     hobby: "",
+      //     gender: "",
+      //   });
+      setErrors({});
+      setFormReview({
+        email: form.email,
+        address: form.address,
+        phoneNumber: form.phoneNumber,
+        gender: form.gender,
+        hobby: form.hobby,
+        name: form.name,
+      });
+
+      router.push("/review");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div className="relative w-full min-h-screen">
+      {/* Form Content */}
+      <div className="w-full px-4 sm:px-6 md:px-10 py-10 relative z-10">
+        <div className="w-full flex flex-col justify-center items-center gap-5">
+          <div className="w-full flex justify-center items-center">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-bold  text-center">
+              FORM FIELD
+            </p>
+          </div>
+
+          {/* Form Fields */}
+          <div className="w-full sm:w-3/4 md:w-2/3 lg:w-1/3 flex flex-col gap-5">
+            {/* Name Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Full Name</Label>
+              <Input
+                placeholder="Full Name"
+                className="animated-input w-full"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              {errors.name && <p className="error-message">{errors.name}</p>}
+            </div>
+
+            {/* Email Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Email</Label>
+              <Input
+                placeholder="Email"
+                className="animated-input w-full"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              {errors.email && <p className="error-message">{errors.email}</p>}
+            </div>
+
+            {/* Phone Number Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Phone Number</Label>
+              <Input
+                placeholder="Phone Number"
+                className="animated-input w-full"
+                value={form.phoneNumber}
+                onChange={(e) =>
+                  setForm({ ...form, phoneNumber: e.target.value })
+                }
+              />
+              {errors.phoneNumber && (
+                <p className="error-message">{errors.phoneNumber}</p>
+              )}
+            </div>
+
+            {/* Address Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Address</Label>
+              <Input
+                placeholder="Address"
+                className="animated-input w-full"
+                value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
+              {errors.address && (
+                <p className="error-message">{errors.address}</p>
+              )}
+            </div>
+
+            {/* Gender Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Gender</Label>
+              <Select
+                onValueChange={(e) => setForm({ ...form, gender: e })}
+                value={form.gender}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.gender && (
+                <p className="error-message">{errors.gender}</p>
+              )}
+            </div>
+
+            {/* Hobby Field */}
+            <div className="flex flex-col gap-2">
+              <Label className="animated-label ">Hobby</Label>
+              <Input
+                placeholder="Hobby"
+                className="animated-input w-full"
+                value={form.hobby}
+                onChange={(e) => setForm({ ...form, hobby: e.target.value })}
+              />
+              {errors.hobby && <p className="error-message">{errors.hobby}</p>}
+            </div>
+
+            {/* Submit Button */}
+            <div>
+              <Button
+                className="animated-button w-full"
+                onClick={handleSubmitForm}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turbo.build?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turbo.build →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
