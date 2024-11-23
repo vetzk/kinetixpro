@@ -2,13 +2,14 @@
   "name": "InternKinetix",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/index.ts",
-    "build": "tsc && tsc-alias",
-    "serve": "cross-env NODE_ENV=production node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma": "npx prisma",
-    "postinstall": "prisma generate",
-    "start": "nodemon src/index.ts"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "serve": "turbo run serve",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky install",
+    "postprepare": "bash -c 'chmod ug+x .husky/*'"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
